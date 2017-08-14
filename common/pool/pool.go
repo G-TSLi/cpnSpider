@@ -4,7 +4,6 @@ import (
 	"time"
 	"sync"
 	"errors"
-	"log"
 )
 
 type (
@@ -57,7 +56,6 @@ func ClassicPool(capacity, maxIdle int,factory Factory, gctime ...time.Duration)
 
 func (self *classic) Call(callback func(Src) error) (err error) {
 	var src Src
-	log.Println("123")
 	err = callback(src)
 	return err
 }

@@ -5,7 +5,7 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
-	"../pool"
+	"cpnSpider/common/pool"
 )
 
 // 删除数据

@@ -1,29 +1,31 @@
 package main
+
 import (
-	"github.com/henrylee2cn/surfer"
-	"io/ioutil"
-	"log"
+	"github.com/lxn/walk"
+	. "github.com/lxn/walk/declarative"
+	"strings"
 )
+
 func main() {
-	// 默认使用surf内核下载
-	resp, err := surfer.Download(&surfer.Request{
-		Url: "http://github.com/henrylee2cn/surfer",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	b, err := ioutil.ReadAll(resp.Body)
-	log.Println(string(b), err)
-	// 指定使用phantomjs内核下载
-	resp, err = surfer.Download(&surfer.Request{
-		Url:          "https://www.baidu.com/",
-		DownloaderID: 1,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	b, err = ioutil.ReadAll(resp.Body)
-	log.Println(string(b), err)
-	resp.Body.Close()
-	surfer.DestroyJsFiles()
+	var inTE, outTE *walk.TextEdit
+
+	MainWindow{
+		Title:   "SCREAMO",
+		MinSize: Size{600, 400},
+		Layout:  VBox{},
+		Children: []Widget{
+			HSplitter{
+				Children: []Widget{
+					TextEdit{AssignTo: &inTE},
+					TextEdit{AssignTo: &outTE, ReadOnly: true},
+				},
+			},
+			PushButton{
+				Text: "SCREAM",
+				OnClicked: func() {
+					outTE.SetText(strings.ToUpper(inTE.Text()))
+				},
+			},
+		},
+	}.Run()
 }

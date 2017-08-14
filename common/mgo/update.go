@@ -3,7 +3,7 @@ package mgo
 import (
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"../pool"
+	"cpnSpider/common/pool"
 )
 
 

@@ -1,7 +1,7 @@
 package mgo
 
 import (
-	"../pool"
+	"cpnSpider/common/pool"
 	"gopkg.in/mgo.v2/bson"
 )
 

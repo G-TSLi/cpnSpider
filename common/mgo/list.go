@@ -2,7 +2,6 @@ package mgo
 
 import (
 	"cpnSpider/common/pool"
-	"log"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -17,8 +16,6 @@ func (self *List) Exec(resultPtr interface{}) (err error)  {
 	//	}
 	//}()
 	err = Call(func(src pool.Src) error {
-
-		log.Println("456")
 
 		resultPtr2 := resultPtr.(*map[string][]string)
 		*resultPtr2 = map[string][]string{}

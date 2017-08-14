@@ -5,7 +5,7 @@ import (
 
 	"gopkg.in/mgo.v2/bson"
 
-	"../pool"
+	"cpnSpider/common/pool"
 )
 
 // 更新第一个匹配的数据，若无匹配项则插入
