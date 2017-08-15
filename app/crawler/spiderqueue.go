@@ -7,6 +7,8 @@ import (
 type (
 	SpiderQueue interface {
 		Add(*Spider)
+		GetAll() []*Spider
+		Len() int
 	}
 	sq struct {
 		list []*Spider
@@ -21,4 +23,12 @@ func NewSpiderQueue() SpiderQueue {
 
 func (self *sq) Add(sp *Spider) {
 	self.list = append(self.list, sp)
+}
+
+func (self *sq) GetAll() []*Spider {
+	return self.list
+}
+
+func (self *sq) Len() int {
+	return len(self.list)
 }

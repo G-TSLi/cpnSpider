@@ -7,6 +7,7 @@ type AppConf struct {
 	ThreadNum      	int    	// 全局最大并发量
 	Pausetime      	int64  	// 暂停时长参考/ms(随机: Pausetime/2 ~ Pausetime*2)
 	Limit  			int64 	//采集上限，0为不限
+	ProxyMinute    int64  // 代理IP更换的间隔分钟数
 }
 
 

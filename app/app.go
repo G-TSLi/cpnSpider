@@ -17,6 +17,7 @@ type (
 		GetAppConf(k ...string) interface{}
 		SetAppConf(k string, v interface{}) App
 		SpiderPrepare(original []*spider.Spider) App
+		GetSpiderQueue() crawler.SpiderQueue
 	}
 	Logic struct {
 		*cache.AppConf
@@ -36,7 +37,7 @@ func New() App {
 
 func newLogic() *Logic {
 	return &Logic{
-		AppConf:       cache.Task,
+		AppConf:	cache.Task,
 	}
 }
 
@@ -61,6 +62,11 @@ func (self *Logic) SetAppConf(k string, v interface{}) App {
 		acv.FieldByName(key).Set(reflect.ValueOf(v))
 	}
 	return self
+}
+
+// 获取蜘蛛队列接口实例
+func (self *Logic) GetSpiderQueue() crawler.SpiderQueue {
+	return self.SpiderQueue
 }
 
 func (self *Logic) Init(mode int, port int, master string) App {
