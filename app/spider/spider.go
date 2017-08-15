@@ -16,5 +16,5 @@ func (self *Spider) RequestPush(req *request.Request)  {
 }
 
 func (self *Spider) RequestPull() *request.Request  {
-	
+	return nil
 }

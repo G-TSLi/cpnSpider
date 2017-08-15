@@ -3,7 +3,6 @@ package request
 import (
 	"net/http"
 	"time"
-	"sync"
 	"strings"
 )
 
