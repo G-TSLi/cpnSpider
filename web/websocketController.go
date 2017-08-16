@@ -5,6 +5,7 @@ import (
 	"cpnSpider/app/spider"
 	"cpnSpider/common/util"
 	ws "cpnSpider/common/websocket"
+	"cpnSpider/runtime/status"
 	"sync"
 	"log"
 )
@@ -134,6 +135,16 @@ func init()  {
 		// 写入发送通道
 		Sc.Write(sessID, tplData(mode))
 	}
+
+	wsApi["run"]=func(sessID string, req map[string]interface{}) {
+		setConf(req)
+		if app.LogicApp.GetAppConf("mode").(int) == status.OFFLINE {
+			Sc.Write(sessID, map[string]interface{}{"operate": "run"})
+		}
+		go func() {
+			app.LogicApp.Run()
+		}()
+	}
 }
 
 func tplData(mode int) map[string]interface{} {
@@ -151,7 +162,6 @@ func tplData(mode int) map[string]interface{} {
 			for _, sp := range app.LogicApp.GetSpiderQueue().GetAll() {
 				curr[sp.GetName()] = true
 			}
-
 			return curr
 		}(),
 	}
@@ -175,6 +185,15 @@ func tplData(mode int) map[string]interface{} {
 		"curr": []int64{app.LogicApp.GetAppConf("ProxyMinute").(int64)},
 	}
 
+	// 采集上限
+	info["Limit"] = app.LogicApp.GetAppConf("Limit")
+
+	// 自定义配置
+	info["Keyins"] = app.LogicApp.GetAppConf("Keyins")
+
+	// 运行状态
+	info["status"] = app.LogicApp.Status()
+
 	return info
 }
 
@@ -188,12 +207,23 @@ func setConf(req map[string]interface{})  {
 	app.LogicApp.
 		SetAppConf("Pausetime", int64(util.Atoi(req["Pausetime"]))).
 		SetAppConf("ProxyMinute", int64(util.Atoi(req["ProxyMinute"]))).
-		SetAppConf("Limit", int64(util.Atoi(req["Limit"])))
-
+		SetAppConf("Limit", int64(util.Atoi(req["Limit"]))).
+		SetAppConf("Keyins", util.Atoa(req["Keyins"]))
 	setSpiderQueue(req)
 }
 
 func setSpiderQueue(req map[string]interface{}) {
+	spNames, ok := req["spiders"].([]interface{})
+	if !ok {
+		return
+	}
 	spiders := []*spider.Spider{}
+	for _, sp := range app.LogicApp.GetSpiderLib() {
+		for _, spName := range spNames {
+			if util.Atoa(spName) == sp.GetName() {
+				spiders = append(spiders, sp)
+			}
+		}
+	}
 	app.LogicApp.SpiderPrepare(spiders)
 }

@@ -8,6 +8,9 @@ import (
 	"reflect"
 	"strings"
 	"cpnSpider/teleport"
+	"sync"
+	"cpnSpider/runtime/status"
+	"log"
 )
 
 type (
@@ -18,6 +21,9 @@ type (
 		SetAppConf(k string, v interface{}) App
 		SpiderPrepare(original []*spider.Spider) App
 		GetSpiderQueue() crawler.SpiderQueue
+		GetSpiderLib() []*spider.Spider
+		Status() int
+		Run()
 	}
 	Logic struct {
 		*cache.AppConf
@@ -25,6 +31,8 @@ type (
 		crawler.SpiderQueue
 		*distribute.TaskJar
 		teleport.Teleport
+		status		int
+		sync.RWMutex
 	}
 )
 
@@ -37,7 +45,10 @@ func New() App {
 
 func newLogic() *Logic {
 	return &Logic{
-		AppConf:	cache.Task,
+		AppConf:		cache.Task,
+		SpiderSpecies: 	spider.Species,
+		status:        	status.STOPPED,
+		SpiderQueue:   crawler.NewSpiderQueue(),
 	}
 }
 
@@ -62,6 +73,18 @@ func (self *Logic) SetAppConf(k string, v interface{}) App {
 		acv.FieldByName(key).Set(reflect.ValueOf(v))
 	}
 	return self
+}
+
+// 通过名字获取某蜘蛛
+func (self *Logic) GetSpiderByName(name string) *spider.Spider {
+	return self.SpiderSpecies.GetByName(name)
+}
+
+// 返回当前运行状态
+func (self *Logic) Status() int {
+	self.RWMutex.RLock()
+	defer self.RWMutex.RUnlock()
+	return self.status
 }
 
 // 获取蜘蛛队列接口实例
@@ -96,9 +119,6 @@ func (self *Logic) GetSpiderLib() []*spider.Spider {
 	return self.SpiderSpecies.Get()
 }
 
-func (self *Logic) Run()  {
-}
-
 func (self *Logic) addNewTask() (tasksNum int)  {
 	t := distribute.Task{}
 	// 从配置读取字段
@@ -117,3 +137,22 @@ func (self *Logic) setTask(task *distribute.Task) {
 	task.Limit = self.AppConf.Limit
 }
 
+func (self *Logic) Run() {
+	log.Println(self.SpiderQueue.Len())
+	self.offline()
+}
+
+// 离线模式运行
+func (self *Logic) offline() {
+	self.exec()
+}
+
+// 开始执行任务
+func (self *Logic) exec() {
+	count := self.SpiderQueue.Len()
+	go self.goRun(count)
+}
+
+func (self *Logic) goRun(count int) {
+	log.Println(self.SpiderQueue.GetByIndex(1).RuleTree)
+}

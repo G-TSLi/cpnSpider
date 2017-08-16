@@ -57,12 +57,11 @@ function home() {
     }
 }
 
-
 // 发送api
 ws.onsend = function(data) {
     var dataStr = JSON.stringify(data);
-    ws.send(dataStr);
     console.log("send: " + dataStr);
+    ws.send(dataStr);
 }
 
 // 接收api
@@ -137,6 +136,42 @@ ws.onmessage = function(m) {
     }
 }
 
+// 开始或停止运行任务
+function runStop() {
+    if ($("#btn-run").attr("data-type") == 'run') {
+        ws.onsend(getForm());
+    }
+    return false;
+};
+
+// 返回选择的蜘蛛
+function getSpiders() {
+    var spiders = [];
+    var spiderAll = document.getElementsByName('spiders');
+    for (var i = spiderAll.length - 1; i >= 0; i--) {
+        if (spiderAll[i].checked) {
+            spiders[spiders.length] = spiderAll[i].value;
+        }
+    };
+    return spiders
+};
+
+// 获取表单值
+function getForm() {
+    return {
+        'operate': 'run',
+        'spiders': getSpiders(),
+        'Keyins': document.pholcus.elements['Keyins'].value,
+        'ThreadNum': document.pholcus.elements['ThreadNum'].value,
+        'Limit': document.pholcus.elements['Limit'].value,
+        // 'DockerCap': document.pholcus.elements['DockerCap'].value,
+        'Pausetime': document.pholcus.elements['Pausetime'].value,
+        'ProxyMinute': document.pholcus.elements['ProxyMinute'].value,
+        // 'OutType': document.pholcus.elements['OutType'].value,
+        // 'SuccessInherit': document.pholcus.elements['SuccessInherit'].value,
+        // 'FailureInherit': document.pholcus.elements['FailureInherit'].value,
+    }
+}
 
 // 按模式启动
 function Open(operate) {

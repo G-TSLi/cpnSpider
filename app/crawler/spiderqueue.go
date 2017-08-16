@@ -8,6 +8,7 @@ type (
 	SpiderQueue interface {
 		Add(*Spider)
 		GetAll() []*Spider
+		GetByIndex(int) *Spider
 		Len() int
 	}
 	sq struct {
@@ -31,4 +32,8 @@ func (self *sq) GetAll() []*Spider {
 
 func (self *sq) Len() int {
 	return len(self.list)
+}
+
+func (self *sq) GetByIndex(idx int) *Spider {
+	return self.list[idx]
 }

@@ -26,7 +26,7 @@ var Html = function(info) {
               </div>' +
         ThreadNumHtml(info.ThreadNum) +
         PausetimeHtml(info.Pausetime) +
-        // ProxyMinuteHtml(info.ProxyMinute) +
+        ProxyMinuteHtml(info.ProxyMinute) +
         // DockerCapHtml(info.DockerCap) +
         // OutTypeHtml(info.OutType) +
         // SuccessInheritHtml(info.SuccessInherit) +

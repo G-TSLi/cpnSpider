@@ -8,6 +8,7 @@ import (
 
 type Request struct {
 	Url           string          //目标URL，必须设置
+	Rule          string
 	Method        string          //GET POST POST-M HEAD
 	Header        http.Header     //请求头信息
 	EnableCookie  bool            //是否使用cookies，在Spider的EnableCookie设置
@@ -41,6 +42,12 @@ func (self *Request) SetMethod(method string) *Request {
 	self.Method = strings.ToUpper(method)
 	return self
 }
+
+func (self *Request) SetRuleName(ruleName string) *Request {
+	self.Rule = ruleName
+	return self
+}
+
 
 func (self *Request) SetUrl(url string) *Request {
 	self.Url = url
