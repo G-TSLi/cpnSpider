@@ -17,6 +17,8 @@ var SurferDownloader = &Surfer{
 }
 
 func (self *Surfer) Download(sp *spider.Spider, cReq *request.Request) *spider.Context{
+
+
 	ctx := spider.GetContext(sp, cReq)
 
 	var resp *http.Response

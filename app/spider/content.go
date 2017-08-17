@@ -1,10 +1,16 @@
 package spider
 
 import (
+	"bytes"
 	"cpnSpider/app/downloader/request"
 	"cpnSpider/common/goquery"
 	"sync"
 	"net/http"
+	"io/ioutil"
+	"mime"
+	"strings"
+	"io"
+	"golang.org/x/net/html/charset"
 )
 
 type Context struct {
@@ -18,7 +24,10 @@ type Context struct {
 
 var (
 	contextPool = &sync.Pool{
-		
+		New: func() interface{} {
+			return &Context{
+			}
+		},
 	}
 )
 
@@ -34,11 +43,83 @@ func (self *Context) SetResponse(resp *http.Response) *Context {
 	return self
 }
 
+// 获取当前规则名。
+func (self *Context) GetRuleName() string {
+	return self.Request.GetRuleName()
+}
+
 func (self *Context) SetError (err error)  {
 	self.err = err
 }
 
+// GetBodyStr returns plain string crawled.
+func (self *Context) initText() {
+	var err error
+	var contentType, pageEncode string
+	// 优先从响应头读取编码类型
+	contentType = self.Response.Header.Get("Content-Type")
+	if _, params, err := mime.ParseMediaType(contentType); err == nil {
+		if cs, ok := params["charset"]; ok {
+			pageEncode = strings.ToLower(strings.TrimSpace(cs))
+		}
+	}
+	// 响应头未指定编码类型时，从请求头读取
+	if len(pageEncode) == 0 {
+		contentType = self.Request.Header.Get("Content-Type")
+		if _, params, err := mime.ParseMediaType(contentType); err == nil {
+			if cs, ok := params["charset"]; ok {
+				pageEncode = strings.ToLower(strings.TrimSpace(cs))
+			}
+		}
+	}
+
+	switch pageEncode {
+	// 不做转码处理
+	case "utf8", "utf-8":
+	default:
+		var destReader io.Reader
+
+		if len(pageEncode) == 0 {
+			destReader, err = charset.NewReader(self.Response.Body, "")
+		} else {
+			destReader, err = charset.NewReaderLabel(pageEncode, self.Response.Body)
+		}
+		if err == nil {
+			self.text, err = ioutil.ReadAll(destReader)
+			if err == nil {
+				self.Response.Body.Close()
+				return
+			} else {
+			}
+		} else {
+		}
+	}
+
+	// 不做转码处理
+	self.text, err = ioutil.ReadAll(self.Response.Body)
+	self.Response.Body.Close()
+	if err != nil {
+		panic(err.Error())
+		return
+	}
+}
+
+func (self *Context) initDom() *goquery.Document {
+	if self.text == nil {
+		self.initText()
+	}
+	var err error
+	self.dom, err = goquery.NewDocumentFromReader(bytes.NewReader(self.text))
+	if err != nil {
+		panic(err.Error())
+	}
+	return self.dom
+}
+
 func (self *Context) GetDom() *goquery.Document {
+	if self.dom == nil {
+		self.initDom()
+	}
 	return self.dom
 }
 
@@ -73,7 +154,14 @@ func (self *Context) Parse(ruleName ...string) *Context {
 }
 
 func (self *Context) getRule(ruleName ...string) (name string, rule *Rule, found bool) {
-	name = ruleName[0]
+	if len(ruleName) == 0 {
+		if self.Response == nil {
+			return
+		}
+		name = self.GetRuleName()
+	} else {
+		name = ruleName[0]
+	}
 	rule, found = self.spider.GetRule(name)
 	return
 }

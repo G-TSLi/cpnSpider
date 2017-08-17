@@ -26,7 +26,6 @@ type Request struct {
 	proxy  string //当用户界面设置可使用代理IP时，自动设置代理
 }
 
-
 // 获取Url
 func (self *Request) GetUrl() string {
 	return self.Url
@@ -132,3 +131,8 @@ func (self *Request) SetDownloaderID(id int) *Request {
 	self.DownloaderID = id
 	return self
 }
+
+func (self *Request) GetRuleName() string {
+	return self.Rule
+}
+

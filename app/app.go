@@ -10,7 +10,6 @@ import (
 	"cpnSpider/teleport"
 	"sync"
 	"cpnSpider/runtime/status"
-	"log"
 )
 
 type (
@@ -138,7 +137,6 @@ func (self *Logic) setTask(task *distribute.Task) {
 }
 
 func (self *Logic) Run() {
-	log.Println(self.SpiderQueue.Len())
 	self.offline()
 }
 
@@ -154,5 +152,20 @@ func (self *Logic) exec() {
 }
 
 func (self *Logic) goRun(count int) {
-	log.Println(self.SpiderQueue.GetByIndex(1).RuleTree)
+
+
+	var i int
+
+
+	for i=0;i < count && self.Status() != status.STOP;i++{
+		// 从爬行队列取出空闲蜘蛛，并发执行
+		c :=crawler.New()
+		if c != nil {
+			go func(i int, c crawler.Crawler) {
+				// 执行并返回结果消息
+				c.Init(self.SpiderQueue.GetByIndex(i)).Run()
+			}(i, c)
+		}
+	}
+
 }

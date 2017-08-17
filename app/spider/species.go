@@ -2,11 +2,13 @@ package spider
 
 import (
 	"fmt"
+	"cpnSpider/common/pinyin"
 )
 
 type SpiderSpecies struct {
 	list   []*Spider
 	hash   map[string]*Spider
+	sorted bool
 }
 
 var Species = &SpiderSpecies{
@@ -29,10 +31,27 @@ func (self *SpiderSpecies) Add(sp *Spider) *Spider {
 	return sp
 }
 
+// 获取全部蜘蛛种类
 func (self *SpiderSpecies) Get() []*Spider {
+	if !self.sorted {
+		l :=len(self.list)
+		initials := make([]string, l)
+		newlist := map[string]*Spider{}
+		for i := 0; i < l; i++ {
+			initials[i] = self.list[i].GetName()
+			newlist[initials[i]] = self.list[i]
+		}
+		// 按首字母排序
+		pinyin.SortInitials(initials)
+		for i := 0; i < l; i++ {
+			self.list[i] = newlist[initials[i]]
+		}
+		self.sorted = true
+	}
 	return self.list
 }
 
+// 通过名称获取蜘蛛种类
 func (self *SpiderSpecies) GetByName(name string) *Spider {
 	return self.hash[name]
 }

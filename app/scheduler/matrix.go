@@ -16,22 +16,20 @@ type Matrix struct {
 
 func newMatrix(spiderName string) *Matrix {
 	matrix :=&Matrix{
-		spiderName: 	spiderName,
-		reqs:        	make(map[int][]*request.Request),
+		spiderName:  spiderName,
+		reqs:        make(map[int][]*request.Request),
+		priorities:  []int{},
 	}
 	return matrix
 }
 
 // 添加请求到队列，并发安全
 func (self *Matrix) Push(req * request.Request)  {
-	self.Lock()
-	defer self.Unlock()
-
 	// 达到请求上限，停止该规则运行
-	if self.maxPage >= 0 {
-		return
-	}
-
+	//if self.maxPage >= 0 {
+	//	return
+	//}
+	//
 	var priority = req.GetPriority()
 
 	if _, found := self.reqs[priority]; !found {
@@ -44,7 +42,7 @@ func (self *Matrix) Push(req * request.Request)  {
 	self.reqs[priority] = append(self.reqs[priority], req)
 }
 
-func (self *Matrix) Pull(req *request.Request)  {
+func (self *Matrix) Pull() (req *request.Request)  {
 	self.Lock()
 	defer self.Unlock()
 

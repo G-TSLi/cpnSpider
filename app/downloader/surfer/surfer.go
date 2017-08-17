@@ -3,6 +3,7 @@ package surfer
 import (
 	"net/http"
 	"sync"
+	"log"
 )
 
 
@@ -17,11 +18,9 @@ var (
 
 
 func Download(req Request) (resp *http.Response, err error) {
-	switch req.GetDownloaderID() {
-	case SurfID:
-		once_surf.Do(func() { surf = New() })
-		resp, err = surf.Download(req)
-	}
+	once_surf.Do(func() { surf = New() })
+	resp, err = surf.Download(req)
+	log.Println(resp)
 	return
 }
 
